@@ -1,0 +1,418 @@
+body { font-family: 'Plus Jakarta Sans', sans-serif; scroll-behavior: smooth; background-color: #f8fafc; }         
+.hidden { display: none !important; }       
+.spinner { border: 4px solid rgba(255, 255, 255, 0.3); border-radius: 50%; border-top: 4px solid #ffffff; width: 40px; height: 40px; animation: spin 1s linear infinite; }
+@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+.fade-in { animation: fadeIn 0.4s ease-out forwards; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+.row-enter { animation: rowEnter 0.3s ease-out forwards; opacity: 0; }
+@keyframes rowEnter { from { opacity: 0; transform: translateX(-10px); } to { opacity: 1; transform: translateX(0); } }
+.popup-enter { animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
+@keyframes popIn { from { opacity: 0; transform: scale(0.8); } to { opacity: 1; transform: scale(1); } }
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 4px; }
+::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+.glass-panel { background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.3); }
+.emergency-row { background-color: #fff1f2 !important; border-left: 4px solid #e11d48 !important; }
+
+/* Sembunyikan scrollbar untuk elemen spesifik tetapi tetap bisa di-scroll */
+.hide-scrollbar::-webkit-scrollbar {
+    display: none;
+}
+.hide-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+
+/* Styling untuk elemen Custom Scrollbar Setting Admin */
+.custom-scrollbar::-webkit-scrollbar {
+    width: 6px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+    background: #cbd5e1; 
+    border-radius: 10px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8; 
+}
+
+/* ==========================================================================
+   UPGRADE UI MODE ADMIN (MODERN, SMOOTH, & INTERACTIVE)
+   ========================================================================== */
+
+/* 1. Efek Backdrop Blur Premium pada Semua Modal Admin */
+#master-admin-settings-modal, 
+#admin-bug-modal, 
+#user-bug-modal,
+#custom-dialog-overlay {
+    backdrop-filter: blur(12px) !important;
+    background-color: rgba(15, 23, 42, 0.4) !important;
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+/* Modifikasi Kotak Modal Admin */
+#master-admin-settings-modal > div,
+#admin-bug-modal > div,
+#user-bug-modal > div {
+    border: 1px solid rgba(255, 255, 255, 0.7);
+    background: rgba(255, 255, 255, 0.96) !important;
+    box-shadow: 0 30px 60px -15px rgba(15, 23, 42, 0.15), 
+                0 0 50px -10px rgba(99, 102, 241, 0.05) !important;
+    border-radius: 28px !important;
+}
+
+/* 2. Tombol Navigasi Sidebar Admin yang Mulus & Interaktif */
+.admin-tab-btn {
+    position: relative;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    border-left: 4px solid transparent !important;
+    border-radius: 12px !important;
+    font-weight: 600 !important;
+    color: #475569 !important;
+    background-color: transparent !important;
+}
+
+/* Efek Hover Tab */
+.admin-tab-btn:hover {
+    transform: translateX(6px);
+    background-color: rgba(241, 245, 249, 0.9) !important;
+    color: #1e293b !important;
+}
+
+/* Indikator Tab Aktif Otomatis */
+.admin-tab-btn.bg-blue-600,
+#master-admin-settings-modal button.bg-blue-600 {
+    background: linear-gradient(135deg, #4f46e5 0%, #3b82f6 100%) !important;
+    box-shadow: 0 10px 20px -5px rgba(79, 70, 229, 0.3) !important;
+    border-left: 4px solid #ffffff !important;
+    color: #ffffff !important;
+    transform: translateY(-1px) scale(1.02);
+}
+
+/* 3. Animasi Transisi Halus Saat Berpindah Tab & Perbaikan Layout Scroll */
+.admin-tab-content:not(.hidden) {
+    display: block !important;
+    flex: 1 1 0% !important;   
+    min-height: 0 !important;   
+    height: auto !important;    
+    overflow-y: auto !important; 
+    padding-bottom: 2rem !important; 
+    animation: smoothSlideUp 0.45s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes smoothSlideUp {
+    from {
+        opacity: 0;
+        transform: translateY(16px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Responsivitas Desktop */
+@media (min-width: 768px) {
+    .admin-tab-content:not(.hidden) {
+        height: 100% !important; 
+        flex: none !important;
+    }
+}
+
+/* 4. Tampilan Kotak Konten & Form Dalam Tab (Friendly Card Design) */
+.admin-tab-content .bg-blue-50 {
+    background: linear-gradient(180deg, #ffffff 0%, #f0f7ff 100%) !important;
+    border: 1px solid #e0f2fe !important;
+    border-radius: 20px !important;
+    box-shadow: 0 4px 20px -4px rgba(59, 130, 246, 0.06);
+}
+
+.admin-tab-content .bg-indigo-50 {
+    background: linear-gradient(180deg, #ffffff 0%, #f5f3ff 100%) !important;
+    border: 1px solid #ede9fe !important;
+    border-radius: 20px !important;
+    box-shadow: 0 4px 20px -4px rgba(139, 92, 246, 0.06);
+}
+
+/* 5. Upgrade Elemen Input, Select & Textarea Kontrol Admin */
+.admin-tab-content input, 
+.admin-tab-content select, 
+.admin-tab-content textarea {
+    border: 1px solid #cbd5e1 !important;
+    border-radius: 14px !important;
+    padding: 10px 14px !important;
+    transition: all 0.2s ease !important;
+    background-color: #ffffff !important;
+}
+
+/* Fokus Ring Interaktif */
+.admin-tab-content input:focus, 
+.admin-tab-content select:focus, 
+.admin-tab-content textarea:focus {
+    border-color: #4f46e5 !important;
+    box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.12) !important;
+    transform: translateY(-1px);
+}
+
+/* Desain Premium Khusus Input File (Upload Excel/Foto) */
+.admin-tab-content input[type="file"] {
+    background: #f8fafc !important;
+    border: 2px dashed #cbd5e1 !important;
+    cursor: pointer;
+}
+.admin-tab-content input[type="file"]:hover {
+    border-color: #4f46e5 !important;
+    background: #f5f3ff !important;
+}
+
+/* 6. Dashboard & Tabel Performa Tim Lebih Bersih (Clean & Readable) */
+#dashboard-view .bg-white {
+    border-radius: 24px !important;
+    border: 1px solid #e2e8f0 !important;
+    box-shadow: 0 4px 25px -5px rgba(148, 163, 184, 0.08) !important;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+#dashboard-view .bg-white:hover {
+    box-shadow: 0 15px 35px -5px rgba(148, 163, 184, 0.15) !important;
+}
+
+/* Baris Tabel Interaktif & Highlight */
+#dashboard-table-body tr, 
+#admin-validation-list tr {
+    transition: all 0.2s ease;
+}
+
+#dashboard-table-body tr:hover, 
+#admin-validation-list tr:hover {
+    background-color: #f8fafc !important;
+    transform: scale(1.002);
+    box-shadow: inset 4px 0 0 0 #4f46e5; 
+}
+
+/* 7. Bar Scrollbar Elegan Khusus Menu Admin */
+.custom-scrollbar::-webkit-scrollbar {
+    width: 6px !important;
+    height: 6px !important;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+    background: transparent !important;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+    background: #cbd5e1 !important;
+    border-radius: 10px !important;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8 !important;
+}
+
+/* Tambahan optimasi untuk container penampung GDrive agar responsif di layar kecil */
+#user-gdrive-settings-container {
+    max-height: 50vh !important;
+    overflow-y: auto !important;
+}
+
+/* 8. Tombol Utama Pengaturan Admin pada Header */
+#admin-controls button {
+    background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%) !important;
+    border-radius: 12px !important;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+#admin-controls button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px -4px rgba(15, 23, 42, 0.3) !important;
+}
+
+/* =========================================
+   UI LOGIN MODERN & ANIMASI
+   ========================================= */
+
+/* Animasi bentuk melayang untuk background agar tidak kaku */
+.floating-shape {
+    position: absolute;
+    filter: blur(80px);
+    z-index: 0;
+    opacity: 0.6;
+    animation: float 10s infinite ease-in-out alternate;
+}
+.shape-1 {
+    width: 400px; height: 400px; background: #6366f1; top: -10%; left: -10%; animation-delay: 0s;
+}
+.shape-2 {
+    width: 300px; height: 300px; background: #ec4899; bottom: -10%; right: -10%; animation-delay: -5s;
+}
+
+@keyframes float {
+    0% { transform: translateY(0px) scale(1); }
+    100% { transform: translateY(30px) scale(1.1); }
+}
+
+/* Efek Kaca (Glassmorphism) yang lebih premium */
+.premium-glass {
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.6);
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
+}
+
+/* Efek pantulan cahaya (shimmer) pada tombol saat di-hover */
+@keyframes shimmer {
+    100% { transform: translateX(100%); }
+}
+
+/* Import Font (Pastikan ada di baris pertama) */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
+
+body { 
+    font-family: 'Plus Jakarta Sans', sans-serif; 
+    scroll-behavior: smooth; 
+    background-color: #f0f4f8; 
+    color: #1e293b;
+}         
+
+/* --- GLASSMORPHISM PREMIUM --- */
+.premium-glass {
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.08), 0 0 15px rgba(255, 255, 255, 0.3) inset;
+}
+
+/* --- ANIMASI KEYFRAMES --- */
+.fade-in { animation: fadeIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+@keyframes fadeIn { 
+    from { opacity: 0; transform: translateY(15px); } 
+    to { opacity: 1; transform: translateY(0); } 
+}
+
+.popup-enter { animation: popIn 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; }
+@keyframes popIn { 
+    from { opacity: 0; transform: scale(0.9) translateY(10px); } 
+    to { opacity: 1; transform: scale(1) translateY(0); } 
+}
+
+@keyframes shimmer {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+}
+.animate-shimmer {
+    animation: shimmer 2s infinite;
+}
+
+/* --- KUSTOMISASI SCROLLBAR --- */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { 
+    background: #cbd5e1; 
+    border-radius: 10px; 
+}
+::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+/* --- ANIMASI PANEL ON GOING --- */
+@keyframes pulse-soft {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(79, 70, 229, 0.1); }
+    50% { box-shadow: 0 0 0 10px rgba(79, 70, 229, 0); }
+}
+.animate-pulse-soft {
+    animation: pulse-soft 2s infinite;
+}
+
+@keyframes slideInRight {
+    from { opacity: 0; transform: translateX(20px); }
+    to { opacity: 1; transform: translateX(0); }
+}
+.slide-in-right {
+    animation: slideInRight 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Efek garis pendar di sebelah kiri untuk baris tabel yang aktif */
+.table-row-active {
+    background: linear-gradient(90deg, rgba(79, 70, 229, 0.08) 0%, rgba(255,255,255,0) 100%) !important;
+    border-left: 4px solid #4f46e5 !important;
+    transform: scale(1.005);
+    transition: all 0.3s ease;
+}
+
+/* --- STYLE.CSS --- */
+
+/* Container utama DivIcon Leaflet */
+.custom-div-icon-av {
+    background: transparent;
+    border: none;
+}
+
+/* Styling Marker Foto Profil */
+.canvassing-marker {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: 3px solid #3b82f6; /* Warna default biru */
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+    overflow: hidden; /* Agar foto tetap bulat */
+    background-color: white;
+    transition: all 0.3s ease;
+    position: relative;
+    z-index: 1;
+}
+
+/* Styling gambar di dalam marker */
+.canvassing-marker img {
+    width: 100%;
+    height: 100%;
+    object-cover: cover; /* Agar foto tidak gepeng */
+    border-radius: 50%;
+}
+
+/* EFEK KHUSUS JIKA USER SOS (Warna Merah + Animasi) */
+.canvassing-marker.sos-active {
+    border-color: #ef4444 !important; /* Warna merah SOS */
+    box-shadow: 0 0 15px rgba(239, 68, 68, 0.7);
+    animation: marker-pulse-red 1.5s infinite;
+}
+
+/* Animasi Pulse untuk Marker SOS */
+@keyframes marker-pulse-red {
+    0% {
+        box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7);
+    }
+    70% {
+        box-shadow: 0 0 0 10px rgba(239, 68, 68, 0);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(239, 68, 68, 0);
+    }
+}
+
+/* =========================================
+   PERBAIKAN KOTAK PETUNJUK ARAH (LEAFLET ROUTING)
+   ========================================= */
+.leaflet-routing-container {
+    max-height: 160px !important; /* Membatasi tinggi kotak agar tidak keluar batas */
+    overflow-y: auto !important;  /* Menambahkan scrollbar di dalam kotak */
+    max-width: 100% !important;   /* Menyesuaikan lebar kotak dengan sidebar */
+    margin: 10px 0 0 0 !important;
+    background-color: rgba(255, 255, 255, 0.95) !important;
+    border-radius: 12px !important;
+    border: 1px solid #e2e8f0 !important;
+    font-size: 11px !important;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1) !important;
+}
+
+/* Menyembunyikan kotak sepenuhnya jika ditekan tombol minimize */
+.leaflet-routing-container.leaflet-routing-container-hide {
+    display: none !important;
+}
+
+/* Opsional: Membuat scrollbar kotak routing lebih tipis */
+.leaflet-routing-container::-webkit-scrollbar {
+    width: 4px;
+}
+.leaflet-routing-container::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 4px;
+}

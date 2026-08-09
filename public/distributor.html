@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistem Distribusi Kontak</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen relative overflow-x-hidden antialiased selection:bg-indigo-500 selection:text-white flex flex-col">
+
+    <div class="absolute top-[-10%] left-[-10%] w-[300px] h-[300px] md:w-[500px] md:h-[500px] bg-indigo-200/40 rounded-full blur-3xl -z-10"></div>
+    <div class="absolute bottom-[-10%] right-[-10%] w-[300px] h-[300px] md:w-[500px] md:h-[500px] bg-emerald-200/30 rounded-full blur-3xl -z-10"></div>
+
+    <div class="max-w-5xl mx-auto px-4 py-12 flex-grow">
+        
+        <header class="text-center mb-12">
+            <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-indigo-50 border border-indigo-100 text-indigo-700 text-xs font-semibold uppercase tracking-wider mb-3">
+                SYSTEM OCM 
+            </div>
+            <h1 class="text-3xl md:text-4xl font-extrabold text-slate-900 tracking-tight">
+                Distribusi dan pengelolaan kontrak konsumen
+            </h1>
+            <p class="text-slate-500 mt-2 max-w-md mx-auto text-sm md:text-base">
+                Kelola, unggah, dan distribusikan data konsumen secara acak dengan sistem cooldown otomatis.
+            </p>
+        </header>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
+            
+            <div class="lg:col-span-2 space-y-8">
+                
+                <div class="bg-white/80 backdrop-blur-md p-6 md:p-8 rounded-2xl shadow-xl shadow-slate-100/50 border border-white transition-all duration-300 hover:shadow-2xl hover:shadow-slate-200/50">
+                    <div class="flex items-center gap-3 mb-6">
+                        <div class="w-10 h-10 rounded-xl bg-indigo-50 flex items-center justify-center text-indigo-600 font-bold text-lg">
+                            01
+                        </div>
+                        <div>
+                            <h2 class="text-lg font-bold text-slate-900">Unggah Database Baru</h2>
+                            <p class="text-xs text-slate-500">Mendukung format .xlsx, .xls, dan .csv (Bisa upload ribuan baris sekaligus)</p>
+                        </div>
+                    </div>
+                    
+                    <div class="space-y-5">
+                        <div class="relative group border-2 border-dashed border-slate-200 hover:border-indigo-400 bg-slate-50/50 hover:bg-indigo-50/10 rounded-xl p-6 transition-all duration-200 text-center cursor-pointer">
+                            <input type="file" id="fileUpload" accept=".xlsx, .xls, .csv" onchange="window.updateFileName(this)"
+                                class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" />
+                            
+                            <div class="space-y-2">
+                                <svg class="mx-auto h-12 w-12 text-slate-400 group-hover:text-indigo-500 transition-colors duration-200" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 16.5V9.75m0 0l3 3m-3-3l-3 3M6.75 19.5a4.5 4.5 0 01-1.41-8.775 5.25 5.25 0 0110.233-2.33 3 3 0 013.758 3.848A3.752 3.752 0 0118 19.5H6.75z" />
+                                </svg>
+                                <div class="text-sm font-medium text-slate-700" id="fileLabelText">
+                                    Pilih file Excel atau seret ke sini
+                                </div>
+                                <p class="text-xs text-slate-400">Pastikan baris pertama berisi Judul Kolom</p>
+                            </div>
+                        </div>
+                        
+                        <button id="btnUpload" class="w-full bg-indigo-600 hover:bg-indigo-700 active:scale-[0.99] text-white font-semibold py-3 px-4 rounded-xl shadow-lg shadow-indigo-600/20 hover:shadow-indigo-600/30 transition-all duration-200 disabled:opacity-50 disabled:pointer-events-none flex items-center justify-center gap-2">
+                            <span>Mulai Proses Sinkronisasi</span>
+                        </button>
+                    </div>
+
+                    <div id="uploadStatusBox" class="hidden mt-4 p-4 rounded-xl border text-sm font-medium transition-all duration-300">
+                        <p id="uploadStatus"></p>
+                    </div>
+                </div>
+
+                <div class="bg-white/80 backdrop-blur-md p-6 md:p-8 rounded-2xl shadow-xl shadow-slate-100/50 border border-white transition-all duration-300 hover:shadow-2xl hover:shadow-slate-200/50">
+                    <div class="flex items-center justify-between mb-6">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center text-emerald-600 font-bold text-lg">
+                                02
+                            </div>
+                            <div>
+                                <h2 class="text-lg font-bold text-slate-900">Ambil & Distribusikan</h2>
+                                <p class="text-xs text-slate-500">Sistem proteksi jeda pengambilan 3 Hari</p>
+                            </div>
+                        </div>
+                        <button id="btnRefreshCount" class="p-2 bg-slate-100 hover:bg-slate-200 text-slate-500 rounded-full transition-colors group" title="Perbarui Status Database">
+                            <svg class="w-5 h-5 group-hover:rotate-180 transition-transform duration-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                            </svg>
+                        </button>
+                    </div>
+                    
+                    <div class="space-y-5">
+                        <div class="flex items-center justify-between bg-slate-50/80 p-4 rounded-xl border border-slate-100">
+                            <div class="flex items-center gap-2">
+                                <div class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
+                                <span class="text-xs font-bold text-slate-600 uppercase tracking-wider">Status Database</span>
+                            </div>
+                            <div class="flex items-center gap-5 text-sm font-extrabold">
+                                <div class="flex flex-col items-end">
+                                    <span class="text-[10px] text-slate-400 font-semibold uppercase">Total Data</span>
+                                    <span class="text-indigo-600" id="countTotal">...</span>
+                                </div>
+                                <div class="w-px h-8 bg-slate-200"></div>
+                                <div class="flex flex-col items-end">
+                                    <span class="text-[10px] text-slate-400 font-semibold uppercase">Siap Diambil</span>
+                                    <span class="text-emerald-600" id="countAvailable">...</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-2">Jumlah Data yang Diinginkan</label>
+                            <div class="relative rounded-xl shadow-sm">
+                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400 font-medium text-sm">
+                                    Qty:
+                                </div>
+                                <input type="number" id="jumlahDownload" value="10" min="1" max="450" 
+                                    class="w-full border border-slate-200 bg-slate-50/50 rounded-xl py-3 pl-12 pr-4 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all font-semibold text-slate-800">
+                            </div>
+                        </div>
+                        
+                        <button id="btnDownload" class="w-full bg-emerald-600 hover:bg-emerald-700 active:scale-[0.99] text-white font-semibold py-3 px-4 rounded-xl shadow-lg shadow-emerald-600/20 hover:shadow-emerald-600/30 transition-all duration-200 disabled:opacity-50 disabled:pointer-events-none flex items-center justify-center gap-2">
+                            <span>Unduh Data Acak Berformat .XLSX</span>
+                        </button>
+                    </div>
+
+                    <div id="downloadStatusBox" class="hidden mt-4 p-4 rounded-xl border text-sm font-medium transition-all duration-300">
+                        <p id="downloadStatus"></p>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="space-y-6">
+                <div class="bg-slate-900 text-white p-6 rounded-2xl shadow-xl border border-slate-800">
+                    <h3 class="text-sm font-bold uppercase tracking-wider text-slate-400 mb-4 flex items-center gap-2">
+                        <svg class="h-4 w-4 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                        Referensi Kolom Excel
+                    </h3>
+                    <p class="text-xs text-slate-400 mb-4 leading-relaxed">
+                        Sistem mencocokkan data secara otomatis berdasarkan nama kolom (*case-sensitive*). Pastikan file Anda memuat kolom wajib berikut:
+                    </p>
+                    <div class="space-y-2.5 text-xs">
+                        <div class="flex justify-between items-center p-2 rounded bg-slate-800/60 border border-slate-700/50">
+                            <span class="font-mono text-indigo-300 font-semibold">NOMOR KONTRAK</span>
+                            <span class="text-slate-400 text-[11px]">(ID customer)</span>
+                        </div>
+                        <div class="flex justify-between items-center p-2 rounded bg-slate-800/60 border border-slate-700/50">
+                            <span class="font-mono text-emerald-300 font-semibold">NAMA KONSUMEN</span>
+                            <span class="text-slate-400 text-[11px]">(String)</span>
+                        </div>
+                        <div class="flex justify-between items-center p-2 rounded bg-slate-800/60 border border-slate-700/50">
+                            <span class="font-mono text-cyan-300 font-semibold">NO HP 1</span>
+                            <span class="text-slate-400 text-[11px]">(Nomor Telepon/WA)</span>
+                        </div>
+                        <div class="flex justify-between items-center p-2 rounded bg-slate-800/60 border border-slate-700/50">
+                            <span class="font-mono text-amber-300 font-semibold">TYPE</span>
+                            <span class="text-slate-400 text-[11px]">(Kategori Kendaraan)</span>
+                        </div>
+                        <div class="flex justify-between items-center p-2 rounded bg-slate-800/60 border border-slate-700/50">
+                            <span class="font-mono text-rose-300 font-semibold">SISA ANGS</span>
+                            <span class="text-slate-400 text-[11px]">(Sisa Angsuran)</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white p-6 rounded-2xl shadow-md border border-slate-100">
+                    <h3 class="text-xs font-bold uppercase tracking-wider text-slate-500 mb-2">Aturan Rotasi & Penambahan Data</h3>
+                    <div class="flex items-start gap-3">
+                        <div class="mt-1 p-1 bg-amber-50 rounded-lg text-amber-600">
+                            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                        </div>
+                        <p class="text-xs text-slate-500 leading-relaxed">
+                            Data yang telah diunduh masuk ke masa tunggu (cooldown) **3 hari**.<br><br>
+                            <span class="font-semibold text-slate-700">Penambahan Data:</span> Data baru yang diunggah akan otomatis ditambahkan ke database.<br>
+                            <span class="font-semibold text-slate-700">Update Otomatis:</span> Jika Nomor Kontrak sudah ada di database, sistem otomatis memperbarui datanya. Database lama tetap aman.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <footer class="mt-auto py-6 text-center text-xs font-semibold text-slate-400 bg-white border-t border-slate-200">
+        &copy; RIDHO POS KALIDONI.
+    </footer>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import {
+            getFirestore,
+            collection,
+            doc,
+            getDocs,
+            query,
+            where,
+            writeBatch,
+            getCountFromServer
+        } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyANFutlY71oUw5VUfDYRTiEqmKZyHigEgQ",
+            authDomain: "distribusi-kontrak.firebaseapp.com",
+            databaseURL: "https://distribusi-kontrak-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "distribusi-kontrak",
+            storageBucket: "distribusi-kontrak.firebasestorage.app",
+            messagingSenderId: "717361800015",
+            appId: "1:717361800015:web:2a65b5a80d4f7615625b3a",
+            measurementId: "G-7LM0VYEBEZ",
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        
+        // MASA TUNGGU DIUBAH DARI 4 HARI MENJADI 3 HARI
+        const JEDA_WAKTU = 3 * 24 * 60 * 60 * 1000;
+
+        // FUNGSI MEMPERBARUI STATUS JUMLAH DATABASE
+        async function perbaruiStatusDatabase() {
+            const btnRefresh = document.getElementById('btnRefreshCount');
+            const svgIcon = btnRefresh.querySelector('svg');
+            
+            svgIcon.classList.add('animate-spin');
+            document.getElementById('countTotal').innerText = "...";
+            document.getElementById('countAvailable').innerText = "...";
+
+            try {
+                const waktuSekarang = Date.now();
+                const batasWaktuAman = waktuSekarang - JEDA_WAKTU;
+                const kontrakRef = collection(db, "data_kontrak");
+
+                // Hitung Total Data Keseluruhan
+                const totalSnapshot = await getCountFromServer(kontrakRef);
+                const totalData = totalSnapshot.data().count;
+
+                // Hitung Data yang Tersedia (Tidak dalam masa cooldown)
+                const qTersedia = query(kontrakRef, where("terakhir_diambil", "<", batasWaktuAman));
+                const tersediaSnapshot = await getCountFromServer(qTersedia);
+                const dataTersedia = tersediaSnapshot.data().count;
+
+                document.getElementById('countTotal').innerText = totalData;
+                document.getElementById('countAvailable').innerText = dataTersedia;
+
+                if(totalData === 0 && dataTersedia === 0) {
+                    document.getElementById('countTotal').innerText = "0";
+                    document.getElementById('countAvailable').innerText = "0";
+                }
+            } catch (error) {
+                console.error("Gagal memuat status database:", error);
+                document.getElementById('countTotal').innerText = "Error";
+                document.getElementById('countAvailable').innerText = "Error";
+            } finally {
+                svgIcon.classList.remove('animate-spin');
+            }
+        }
+
+        // FUNGSI POPUP MODERN (TOAST)
+        function showToast(pesan, tipe = 'error') {
+            let container = document.getElementById('toast-container');
+            if (!container) {
+                container = document.createElement('div');
+                container.id = 'toast-container';
+                container.className = 'fixed top-6 left-1/2 transform -translate-x-1/2 z-50 flex flex-col gap-3 w-full max-w-md px-4 pointer-events-none';
+                document.body.appendChild(container);
+            }
+
+            const toast = document.createElement('div');
+            toast.className = `pointer-events-auto flex items-center p-4 rounded-2xl shadow-2xl border transition-all duration-300 transform -translate-y-10 opacity-0 ${
+                tipe === 'error' ? 'bg-red-50/95 backdrop-blur-md border-red-200 text-red-800 shadow-red-500/20' :
+                tipe === 'warning' ? 'bg-amber-50/95 backdrop-blur-md border-amber-200 text-amber-800 shadow-amber-500/20' :
+                'bg-emerald-50/95 backdrop-blur-md border-emerald-200 text-emerald-800 shadow-emerald-500/20'
+            }`;
+
+            const iconHTML = tipe === 'error' 
+                ? `<svg class="w-6 h-6 mr-3 text-red-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>` 
+                : tipe === 'warning' 
+                ? `<svg class="w-6 h-6 mr-3 text-amber-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>`
+                : `<svg class="w-6 h-6 mr-3 text-emerald-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>`;
+
+            toast.innerHTML = `
+                ${iconHTML}
+                <div class="text-sm font-semibold flex-grow leading-snug">${pesan}</div>
+                <button class="ml-4 text-gray-400 hover:text-gray-700 transition-colors focus:outline-none close-toast">
+                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            `;
+
+            container.appendChild(toast);
+
+            toast.querySelector('.close-toast').addEventListener('click', () => {
+                toast.classList.remove('translate-y-0', 'opacity-100');
+                toast.classList.add('-translate-y-10', 'opacity-0');
+                setTimeout(() => toast.remove(), 300);
+            });
+
+            requestAnimationFrame(() => {
+                toast.classList.remove('-translate-y-10', 'opacity-0');
+                toast.classList.add('translate-y-0', 'opacity-100');
+            });
+
+            setTimeout(() => {
+                if (toast.parentElement) {
+                    toast.classList.remove('translate-y-0', 'opacity-100');
+                    toast.classList.add('-translate-y-10', 'opacity-0');
+                    setTimeout(() => toast.remove(), 300);
+                }
+            }, 6000);
+        }
+
+        window.updateFileName = function(input) {
+            const labelText = document.getElementById('fileLabelText');
+            if (input.files && input.files.length > 0) {
+                labelText.innerHTML = `📄 <span class="text-indigo-600 font-semibold">${input.files[0].name}</span> terpilih`;
+            } else {
+                labelText.innerText = 'Pilih file Excel atau seret ke sini';
+            }
+        };
+
+        function tunjukkanStatus(elementId, containerId, pesan, jenis) {
+            const textEl = document.getElementById(elementId);
+            const boxEl = document.getElementById(containerId);
+
+            boxEl.classList.remove(
+                "hidden", "bg-blue-50", "border-blue-200", "text-blue-700",
+                "bg-green-50", "border-green-200", "text-green-700",
+                "bg-amber-50", "border-amber-200", "text-amber-700",
+                "bg-red-50", "border-red-200", "text-red-700"
+            );
+
+            if (jenis === "loading") boxEl.classList.add("bg-blue-50", "border-blue-200", "text-blue-700");
+            else if (jenis === "sukses") boxEl.classList.add("bg-green-50", "border-green-200", "text-green-700");
+            else if (jenis === "peringatan") boxEl.classList.add("bg-amber-50", "border-amber-200", "text-amber-700");
+            else if (jenis === "gagal") boxEl.classList.add("bg-red-50", "border-red-200", "text-red-700");
+
+            textEl.innerText = pesan;
+        }
+
+        function ambilNilaiKolom(row, namaKolomDicari) {
+            if (!row) return null;
+            const kunci = Object.keys(row).find(
+                (k) => k.trim().toUpperCase() === namaKolomDicari.toUpperCase()
+            );
+            return kunci ? row[kunci] : null;
+        }
+
+        // --- SINKRONISASI UNGGAH DATA BARU (TANPA MENGHAPUS DATA LAMA) ---
+        const prosesUpload = async () => {
+            const fileInput = document.getElementById("fileUpload");
+            const btnUpload = document.getElementById("btnUpload");
+            const file = fileInput.files[0];
+
+            if (!window.XLSX) {
+                showToast("Sistem masih memuat engine Excel. Mohon tunggu beberapa detik.", "warning");
+                return;
+            }
+
+            if (!file) {
+                showToast("Silakan pilih dokumen Excel terlebih dahulu!", "warning");
+                return;
+            }
+
+            const originalBtnHtml = btnUpload.innerHTML;
+
+            btnUpload.disabled = true;
+            btnUpload.innerHTML = `
+                <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                <span>Memproses Data...</span>
+            `;
+            
+            tunjukkanStatus("uploadStatus", "uploadStatusBox", "⏳ Membaca file Excel...", "loading");
+
+            const reader = new FileReader();
+            reader.onload = async (e) => {
+                try {
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = window.XLSX.read(data, { type: "array" });
+                    const sheetName = workbook.SheetNames[0];
+                    const jsonData = window.XLSX.utils.sheet_to_json(workbook.Sheets[sheetName], { defval: "" });
+
+                    if (jsonData.length === 0) {
+                        throw new Error("File Excel kosong atau format tidak sesuai.");
+                    }
+
+                    // BATASAN MAKSIMAL BARIS TELAH DIHAPUS 
+                    // LOGIKA MENGHAPUS DATABASE LAMA JUGA TELAH DIHAPUS
+
+                    const kontrakRef = collection(db, "data_kontrak");
+
+                    // PROSES UNGGAH DATA BARU (UPDATE JIKA ADA, TAMBAH JIKA BARU)
+                    const CHUNK_SIZE = 450; 
+                    let totalUploaded = 0;
+
+                    for (let i = 0; i < jsonData.length; i += CHUNK_SIZE) {
+                        const chunk = jsonData.slice(i, i + CHUNK_SIZE);
+                        const batch = writeBatch(db);
+                        let batchedItems = 0;
+
+                        chunk.forEach((row) => {
+                            const rawNoKontrak = ambilNilaiKolom(row, "NOMOR KONTRAK");
+
+                            if (rawNoKontrak !== null && rawNoKontrak !== "") {
+                                const no_kontrak = String(rawNoKontrak).trim();
+
+                                if (no_kontrak.length > 0) {
+                                    const safeDocId = no_kontrak.replace(/[\/\.#$\[\]]/g, "-");
+                                    const docRef = doc(kontrakRef, safeDocId);
+                                    
+                                    batch.set(
+                                        docRef,
+                                        {
+                                            no_kontrak: no_kontrak,
+                                            nama: String(ambilNilaiKolom(row, "NAMA KONSUMEN") || "").trim(),
+                                            no_hp: String(ambilNilaiKolom(row, "NO HP 1") || "").trim(), // BARIS TAMBAHAN
+                                            type: String(ambilNilaiKolom(row, "TYPE") || "").trim(),
+                                            sisa_angsuran: ambilNilaiKolom(row, "SISA ANGS") || 0,
+                                            data_lengkap: row,
+                                            terakhir_diambil: 0, 
+                                        },
+                                        { merge: true }
+                                    );
+
+                                    totalUploaded++;
+                                    batchedItems++;
+                                }
+                            }
+                        });
+
+                        if (batchedItems > 0) {
+                            tunjukkanStatus("uploadStatus", "uploadStatusBox", `⏳ Menyimpan database baru... (${totalUploaded} data)`, "loading");
+                            await batch.commit();
+                            // Jeda waktu antar batch (penting untuk ribuan data agar tidak error timeout)
+                            await new Promise(resolve => setTimeout(resolve, 150));
+                        }
+                    }
+
+                    if (totalUploaded === 0) {
+                        throw new Error("Kolom 'NOMOR KONTRAK' tidak ditemukan atau tidak valid.");
+                    }
+
+                    tunjukkanStatus("uploadStatus", "uploadStatusBox", `✅ Berhasil! ${totalUploaded} data berhasil ditambahkan ke database.`, "sukses");
+                    showToast(`${totalUploaded} Kontak Berhasil Ditambahkan!`, "success");
+                    
+                    fileInput.value = "";
+                    document.getElementById("fileLabelText").innerText = "Pilih file Excel atau seret ke sini";
+                    
+                    // UPDATE UI STATUS DATABASE
+                    await perbaruiStatusDatabase();
+                    
+                } catch (error) {
+                    console.error("Upload Error: ", error);
+                    tunjukkanStatus("uploadStatus", "uploadStatusBox", `❌ Gagal: ${error.message}`, "gagal");
+                } finally {
+                    btnUpload.disabled = false;
+                    btnUpload.innerHTML = originalBtnHtml;
+                }
+            };
+
+            reader.onerror = () => {
+                showToast("Gagal membaca dokumen dari perangkat Anda.", "error");
+                tunjukkanStatus("uploadStatus", "uploadStatusBox", `❌ Gagal membaca dokumen dari lokal.`, "gagal");
+                btnUpload.disabled = false;
+                btnUpload.innerHTML = originalBtnHtml;
+            };
+
+            reader.readAsArrayBuffer(file);
+        };
+
+        // --- DISTRIBUSI & DOWNLOAD DATA ---
+        const prosesDownload = async () => {
+            const jumlahReq = parseInt(document.getElementById("jumlahDownload").value);
+            const btnDownload = document.getElementById("btnDownload");
+
+            if (!window.XLSX) {
+                showToast("Sistem sedang menginisialisasi modul Excel. Mohon tunggu.", "warning");
+                return;
+            }
+
+            if (isNaN(jumlahReq) || jumlahReq <= 0) {
+                showToast("Masukkan kuantitas pengambilan data yang valid (1-450).", "warning");
+                return;
+            }
+
+            const jumlahFinalReq = Math.min(jumlahReq, 450);
+            const originalBtnHtml = btnDownload.innerHTML;
+
+            btnDownload.disabled = true;
+            btnDownload.innerHTML = `
+                <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                <span>Mengecek Database...</span>
+            `;
+            
+            tunjukkanStatus("downloadStatus", "downloadStatusBox", "⏳ Membaca antrean kontak yang tersedia...", "loading");
+
+            try {
+                const waktuSekarang = Date.now();
+                const batasWaktuAman = waktuSekarang - JEDA_WAKTU;
+                const kontrakRef = collection(db, "data_kontrak");
+
+                const q = query(kontrakRef, where("terakhir_diambil", "<", batasWaktuAman));
+                const querySnapshot = await getDocs(q);
+
+                let dataTersedia = [];
+                querySnapshot.forEach((doc) => {
+                    dataTersedia.push({ id_dokumen: doc.id, ...doc.data() });
+                });
+
+                if (dataTersedia.length === 0) {
+                    showToast("Sisa database masih masuk masa tunggu (cooldown) atau kosong.", "warning");
+                    tunjukkanStatus("downloadStatus", "downloadStatusBox", "⚠️ Tidak dapat mengunduh: Seluruh data masih dalam masa cooldown 3 hari atau database kosong.", "peringatan");
+                    return;
+                }
+
+                dataTersedia = dataTersedia.sort(() => 0.5 - Math.random());
+                const jumlahDiambil = Math.min(jumlahFinalReq, dataTersedia.length);
+                const dataTerpilih = dataTersedia.slice(0, jumlahDiambil);
+
+                const batch = writeBatch(db);
+                const dataUntukExcel = [];
+
+                dataTerpilih.forEach((data) => {
+                    const docRef = doc(kontrakRef, data.id_dokumen);
+                    batch.update(docRef, { terakhir_diambil: waktuSekarang });
+
+                    dataUntukExcel.push({
+                        "NOMOR KONTRAK": data.no_kontrak,
+                        "NAMA KONSUMEN": data.nama,
+                        "NO HP 1": data.no_hp || "", // BARIS TAMBAHAN
+                        "TYPE": data.type,
+                        "SISA ANGS": data.sisa_angsuran,
+                    });
+                });
+
+                tunjukkanStatus("downloadStatus", "downloadStatusBox", "⏳ Mengunci masa proteksi data...", "loading");
+                await batch.commit();
+
+                buatDanDownloadExcel(dataUntukExcel);
+                tunjukkanStatus("downloadStatus", "downloadStatusBox", `✅ Berhasil mengunduh ${jumlahDiambil} data secara acak.`, "sukses");
+                showToast(`Berhasil Mengunduh ${jumlahDiambil} Kontak!`, "success");
+
+                // UPDATE UI STATUS DATABASE
+                await perbaruiStatusDatabase();
+                
+            } catch (error) {
+                console.error("Download Error: ", error);
+                showToast("Masalah koneksi server / database. Cek setelan jaringan.", "error");
+                tunjukkanStatus("downloadStatus", "downloadStatusBox", "❌ Masalah koneksi server. Pastikan setelan indeks dan jaringan aktif.", "gagal");
+            } finally {
+                btnDownload.disabled = false;
+                btnDownload.innerHTML = originalBtnHtml;
+            }
+        };
+
+        function buatDanDownloadExcel(data) {
+            const worksheet = window.XLSX.utils.json_to_sheet(data);
+            const workbook = window.XLSX.utils.book_new();
+
+            const wscols = [
+                { wch: 22 }, // Lebar NOMOR KONTRAK
+                { wch: 30 }, // Lebar NAMA KONSUMEN
+                { wch: 20 }, // Lebar NO HP 1 
+                { wch: 15 }, // Lebar TYPE
+                { wch: 15 }, // Lebar SISA ANGS
+            ];
+
+            worksheet["!cols"] = wscols;
+
+            window.XLSX.utils.book_append_sheet(workbook, worksheet, "Distribusi_Kontak");
+            window.XLSX.writeFile(
+                workbook,
+                `Hasil_Distribusi_${new Date().toISOString().slice(0, 10)}.xlsx`
+            );
+        }
+
+        document.addEventListener("DOMContentLoaded", () => {
+            document.getElementById("btnUpload").addEventListener("click", prosesUpload);
+            document.getElementById("btnDownload").addEventListener("click", prosesDownload);
+            document.getElementById("btnRefreshCount").addEventListener("click", perbaruiStatusDatabase);
+            
+            // Panggil pada saat awal halaman dimuat
+            perbaruiStatusDatabase();
+        });
+    </script>
+</body>
+</html>
