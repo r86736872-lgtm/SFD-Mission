@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Search Data Kontrak</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Pustaka Chart.js untuk Grafik Donat -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+        
+        @keyframes softPulse {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.05); opacity: 0.9; }
+        }
+        .animate-soft-pulse {
+            animation: softPulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-[100dvh] relative flex flex-col antialiased">
+
+    <!-- Latar Belakang -->
+    <div class="fixed inset-0 overflow-hidden pointer-events-none -z-10">
+        <div class="absolute top-[-10%] left-[-10%] w-[300px] h-[300px] md:w-[500px] md:h-[500px] bg-indigo-200/40 rounded-full blur-3xl"></div>
+        <div class="absolute bottom-[-10%] right-[-10%] w-[300px] h-[300px] md:w-[500px] md:h-[500px] bg-emerald-200/30 rounded-full blur-3xl"></div>
+    </div>
+
+    <!-- LAYAR LOADING AWAL -->
+    <div id="initial-loading-screen" class="fixed inset-0 bg-slate-50 z-[9999] flex flex-col items-center justify-center transition-opacity duration-500">
+        <div class="relative flex flex-col items-center justify-center w-32 h-32">
+            <svg class="animate-spin absolute inset-0 w-full h-full text-indigo-500/20" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"></circle>
+                <path class="opacity-100 text-indigo-600" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            <img src="logo_SFDM.png" alt="SFDM Logo" class="w-16 h-16 object-contain relative z-10 animate-soft-pulse drop-shadow-md">
+        </div>
+        <div class="mt-6 text-center">
+            <h2 class="text-sm font-extrabold text-slate-700 tracking-wider uppercase mb-1">SFD Mission</h2>
+            <p class="text-xs font-medium text-slate-500 animate-pulse">Memuat Sistem Pencarian...</p>
+        </div>
+    </div>
+
+    <main class="flex-grow w-full flex flex-col">
+        
+        <!-- TAMPILAN JIKA USER BELUM LOGIN -->
+        <div id="unauthorizedSection" class="hidden flex-grow flex items-center justify-center px-4 py-12">
+            <div class="bg-white/80 backdrop-blur-md p-8 rounded-2xl shadow-xl border border-rose-100 w-full max-w-md text-center">
+                <div class="w-16 h-16 bg-rose-100 text-rose-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <svg class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                    </svg>
+                </div>
+                <h1 class="text-2xl font-extrabold text-slate-900 tracking-tight">Akses Ditolak</h1>
+                <p class="text-sm text-slate-500 mt-2 mb-6">Sistem tidak mendeteksi sesi login Anda. Silakan login terlebih dahulu melalui portal utama untuk mengakses halaman ini.</p>
+                <a href="index.html" class="inline-block bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2.5 px-6 rounded-xl text-sm transition-all shadow-md">
+                    Ke Halaman Login
+                </a>
+            </div>
+        </div>
+
+        <!-- HALAMAN UTAMA PENCARIAN -->
+        <div id="mainSection" class="hidden max-w-5xl mx-auto px-4 py-8 w-full flex-col">
+            
+            <header class="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-8 gap-4 border-b border-slate-200 pb-6">
+                
+                <div class="flex items-center gap-4">
+                    <img src="logo_SFDM.png" alt="SFDM Logo" class="w-14 h-14 object-contain drop-shadow-sm">
+                    <div>
+                        <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-indigo-50 border border-indigo-100 text-indigo-700 text-xs font-semibold uppercase tracking-wider mb-1">
+                            SFD Mission - Search
+                        </div>
+                        <h1 class="text-2xl md:text-3xl font-extrabold text-slate-900 tracking-tight">
+                            Data Konsumen
+                        </h1>
+                    </div>
+                </div>
+                
+                <div class="flex flex-wrap items-center gap-3 mt-4 lg:mt-0">
+                    <!-- WIDGET GRAFIK KUOTA READS -->
+                    <div class="flex items-center gap-3 bg-white px-4 py-2 rounded-xl shadow-sm border border-slate-100">
+                        <div class="relative w-8 h-8">
+                            <canvas id="quotaChartCanvas"></canvas>
+                        </div>
+                        <div class="flex flex-col">
+                            <span class="text-[10px] text-slate-500 font-semibold uppercase">Sisa Kuota Reads</span>
+                            <span id="quotaText" class="text-xs font-bold text-emerald-600">Menghitung...</span>
+                        </div>
+                    </div>
+
+                    <!-- WIDGET USER AKTIF (DIPERBARUI DENGAN FOTO PROFIL) -->
+                    <div class="flex items-center gap-3 bg-white px-4 py-2.5 rounded-xl shadow-sm border border-slate-100">
+                        <div class="relative">
+                            <img id="userProfilePic" src="https://ui-avatars.com/api/?name=User&background=e0e7ff&color=4f46e5" alt="Profile" class="w-9 h-9 rounded-full object-cover border-2 border-indigo-50 shadow-sm">
+                            <div class="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full bg-emerald-500 border-2 border-white animate-pulse"></div>
+                        </div>
+                        <span id="greetingText" class="text-xs font-medium text-slate-600 leading-tight">
+                            <!-- Teks sapaan akan diisi oleh JavaScript -->
+                        </span>
+                    </div>
+                </div>
+            </header>
+
+            <!-- FORM PENCARIAN -->
+            <div class="bg-white/80 backdrop-blur-md p-6 rounded-2xl shadow-xl border border-white mb-8">
+                <form id="searchForm" class="flex flex-col md:flex-row gap-4">
+                    <div class="md:w-1/3">
+                        <select id="searchCategory" class="w-full border border-slate-200 bg-slate-50/50 rounded-xl py-3.5 px-4 font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm cursor-pointer appearance-none">
+                            <option value="kontrak">Cari Berdasarkan: No. Kontrak</option>
+                            <option value="hp">Cari Berdasarkan: No. HP</option>
+                            <option value="nama">Cari Berdasarkan: Nama Konsumen</option>
+                        </select>
+                    </div>
+                    
+                    <div class="relative flex-grow">
+                        <input type="text" id="searchInput" placeholder="Ketik Kontrak, HP, atau Nama..." required
+                            class="w-full border border-slate-200 bg-slate-50/50 rounded-xl py-3.5 pl-11 pr-4 font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm">
+                        <svg class="w-5 h-5 text-slate-400 absolute left-3.5 top-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                        </svg>
+                    </div>
+
+                    <button type="submit" id="btnSearch" class="bg-indigo-600 hover:bg-indigo-700 active:scale-[0.99] text-white font-semibold py-3 px-8 rounded-xl shadow-lg shadow-indigo-600/20 transition-all text-sm whitespace-nowrap cursor-pointer">
+                        Cari Data
+                    </button>
+                </form>
+            </div>
+
+            <!-- TABEL HASIL -->
+            <div class="bg-white rounded-2xl shadow-xl border border-slate-100 overflow-hidden mb-6">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse text-sm">
+                        <thead>
+                            <tr class="bg-slate-800 text-white text-xs font-semibold tracking-wider uppercase">
+                                <th class="p-4">No Kontrak</th>
+                                <th class="p-4">Nama Konsumen</th>
+                                <th class="p-4">No HP</th>
+                                <th class="p-4">Type</th>
+                                <th class="p-4 text-right">Sisa Angsuran</th>
+                            </tr>
+                        </thead>
+                        <tbody id="resultTableBody" class="divide-y divide-slate-100 text-slate-700">
+                            <tr>
+                                <td colspan="5" class="p-8 text-center text-slate-400 font-medium">
+                                    Pilih kategori pencarian, masukkan kata kunci, lalu klik "Cari Data".
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+        </div>
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="w-full py-6 text-center text-xs font-semibold text-slate-400 bg-white border-t border-slate-200 shrink-0 z-10">
+        &copy; RIDHO POS KALIDONI.
+    </footer>
+
+    <!-- Firebase SDK (Firestore & Realtime Database) -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+    
+    <script>
+        // =========================================================
+        // KONFIGURASI FIREBASE
+        // =========================================================
+        const firebaseConfig = {
+            apiKey: "AIzaSyA9-fz5YwCvVhTzV4mT65uQ727MWTOm32U",
+            authDomain: "system-ocm.firebaseapp.com",
+            databaseURL: "https://system-ocm-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "system-ocm",
+            storageBucket: "system-ocm.firebasestorage.app",
+            messagingSenderId: "433934854222",
+            appId: "1:433934854222:web:39e21493d1a20d5c993b1f",
+            measurementId: "G-WCT66Z2CCZ",
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const firestore = firebase.firestore();
+        const database = firebase.database();
+
+        const unauthorizedSection = document.getElementById("unauthorizedSection");
+        const mainSection = document.getElementById("mainSection");
+
+        // =========================================================
+        // PENGELOLAAN LOADING SCREEN AWAL
+        // =========================================================
+        function hilangkanLoadingAwal() {
+            const loader = document.getElementById("initial-loading-screen");
+            if (loader) {
+                setTimeout(() => {
+                    loader.classList.add("opacity-0");
+                    setTimeout(() => {
+                        loader.classList.add("hidden");
+                    }, 500); 
+                }, 800);
+            }
+        }
+
+        // =========================================================
+        // DETEKSI LOGIN DAN SAPAAN DINAMIS
+        // =========================================================
+        function getLoggedInUser() {
+            const sessionStr = localStorage.getItem("userSession");
+            if (!sessionStr) return null;
+
+            let sessionData;
+            try {
+                sessionData = JSON.parse(sessionStr);
+            } catch (e) {
+                localStorage.removeItem("userSession");
+                return null;
+            }
+
+            if (!sessionData.expire || new Date().getTime() > sessionData.expire) {
+                localStorage.removeItem("userSession");
+                return null;
+            }
+            return sessionData.user || null;
+        }
+
+        function tampilkanStatusAkses() {
+            const loggedInUser = getLoggedInUser();
+            if (loggedInUser) {
+                unauthorizedSection.classList.add("hidden");
+                mainSection.classList.remove("hidden");
+                mainSection.classList.add("flex");
+                
+                const userName = loggedInUser.name || loggedInUser.username.toUpperCase();
+                
+                // MENGATUR FOTO PROFIL (Menggunakan Inisial Nama)
+                document.getElementById("userProfilePic").src = `https://ui-avatars.com/api/?name=${encodeURIComponent(userName)}&background=e0e7ff&color=4f46e5&font-size=0.33`;
+                
+                // MENGATUR WAKTU SAPAAN
+                const hour = new Date().getHours();
+                let sapaanWaktu = "Malam"; // Default jam 15-6
+                if (hour >= 6 && hour < 11) {
+                    sapaanWaktu = "Pagi";
+                } else if (hour >= 11 && hour < 15) {
+                    sapaanWaktu = "Siang";
+                }
+                
+                // MENAMPILKAN TEKS SAPAAN
+                document.getElementById("greetingText").innerHTML = 
+                    `Haloo Selamat ${sapaanWaktu}!,<br>Selalu semangat <span class="text-indigo-600 font-bold">${userName}</span>`;
+                    
+            } else {
+                mainSection.classList.add("hidden");
+                mainSection.classList.remove("flex");
+                unauthorizedSection.classList.remove("hidden");
+            }
+            return loggedInUser;
+        }
+
+        // =========================================================
+        // FITUR AUTO-SALIN KONTRAK
+        // =========================================================
+        window.salinKontrak = function(teks, btnId) {
+            if (!teks || teks === "-") return;
+            
+            navigator.clipboard.writeText(teks).then(() => {
+                const btn = document.getElementById(btnId);
+                if (btn) {
+                    const originalHtml = btn.innerHTML;
+                    btn.innerHTML = `<span class="text-emerald-600 flex items-center gap-1">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path></svg>
+                        <span class="text-[11px]">Tersalin</span>
+                    </span>`;
+                    
+                    setTimeout(() => {
+                        btn.innerHTML = originalHtml;
+                    }, 2000);
+                }
+            }).catch(err => {
+                console.error("Gagal menyalin:", err);
+                alert("Browser menolak fitur salin otomatis.");
+            });
+        };
+
+        // =========================================================
+        // PEMANTAUAN KUOTA READS (GRAFIK DONAT)
+        // =========================================================
+        const MAX_READS = 50000;
+        let quotaChartInstance = null;
+
+        function getPTDateString() {
+            let ptDate = new Date().toLocaleString("en-US", { timeZone: "America/Los_Angeles" });
+            let d = new Date(ptDate);
+            return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+        }
+
+        function renderQuotaChart(usedReads) {
+            const canvasEl = document.getElementById("quotaChartCanvas");
+            if (!canvasEl) return;
+
+            let sisa = MAX_READS - usedReads;
+            if (sisa < 0) sisa = 0;
+
+            const textEl = document.getElementById("quotaText");
+            if (textEl) {
+                textEl.innerText = `${sisa.toLocaleString('id-ID')}`;
+                if (sisa < 5000) textEl.className = "text-xs font-bold text-rose-600";
+                else textEl.className = "text-xs font-bold text-emerald-600";
+            }
+
+            if (quotaChartInstance) {
+                quotaChartInstance.data.datasets[0].data = [usedReads, sisa];
+                quotaChartInstance.update();
+            } else {
+                const ctx = canvasEl.getContext("2d");
+                quotaChartInstance = new Chart(ctx, {
+                    type: "doughnut",
+                    data: {
+                        labels: ["Terpakai", "Sisa Kuota"],
+                        datasets: [{
+                            data: [usedReads, sisa],
+                            backgroundColor: ["#3b82f6", "#e2e8f0"], 
+                            borderWidth: 0,
+                            cutout: "75%"
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { display: false },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) { return ` ${context.label}: ${context.raw.toLocaleString('id-ID')}`; }
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+        }
+
+        function initQuotaMonitor() {
+            const todayPT = getPTDateString();
+            database.ref(`ocm_quota_tracker/${todayPT}/reads`).on('value', (snapshot) => {
+                let currentReads = snapshot.val() || 0;
+                renderQuotaChart(currentReads);
+            });
+        }
+
+        function catatPenggunaanReads(jumlahRead) {
+            if (jumlahRead <= 0) return;
+            const todayPT = getPTDateString();
+            const ref = database.ref(`ocm_quota_tracker/${todayPT}/reads`);
+            ref.transaction((current) => (current || 0) + jumlahRead).catch(err => console.error(err));
+        }
+
+        // =========================================================
+        // INIT HALAMAN
+        // =========================================================
+        window.addEventListener('DOMContentLoaded', () => {
+            tampilkanStatusAkses();
+            initQuotaMonitor();
+            hilangkanLoadingAwal();
+        });
+        setInterval(tampilkanStatusAkses, 60000); // Cek sesi & update jam setiap 1 menit
+
+        // =========================================================
+        // FUNGSI PENCARIAN 
+        // =========================================================
+        document.getElementById("searchForm").addEventListener("submit", async (e) => {
+            e.preventDefault(); 
+
+            const loggedInUser = tampilkanStatusAkses();
+            if (!loggedInUser) return;
+
+            const btnSearch = document.getElementById("btnSearch");
+            const category = document.getElementById("searchCategory").value; 
+            let keyword = document.getElementById("searchInput").value.trim();
+            const tableBody = document.getElementById("resultTableBody");
+
+            if (!keyword) return;
+
+            if (category === "hp") {
+                keyword = keyword.replace(/\D/g, ''); 
+            } else {
+                keyword = keyword.toUpperCase();
+            }
+
+            btnSearch.disabled = true;
+            btnSearch.innerHTML = `<span class="inline-block animate-spin mr-2">⏳</span> Mencari...`;
+
+            tableBody.innerHTML = `
+                <tr>
+                    <td colspan="5" class="p-8 text-center text-indigo-500 font-semibold">
+                        <span class="inline-block animate-spin mr-2">⏳</span> Menghubungkan ke database server...
+                    </td>
+                </tr>`;
+
+            try {
+                let hasilPencarian = [];
+                let jumlahReadsTercatat = 0; 
+
+                if (category === "hp") {
+                    let keyword0 = keyword;
+                    let keyword62 = keyword;
+                    
+                    if (keyword.startsWith("0")) {
+                        keyword62 = "62" + keyword.substring(1);
+                    } else if (keyword.startsWith("62")) {
+                        keyword0 = "0" + keyword.substring(2);
+                    }
+
+                    const query0 = firestore.collection("ocm_main_db")
+                        .where(category, ">=", keyword0)
+                        .where(category, "<=", keyword0 + "\uf8ff").get();
+                        
+                    const query62 = firestore.collection("ocm_main_db")
+                        .where(category, ">=", keyword62)
+                        .where(category, "<=", keyword62 + "\uf8ff").get();
+
+                    const [snap0, snap62] = await Promise.all([query0, query62]);
+                    
+                    jumlahReadsTercatat = snap0.size + snap62.size;
+
+                    const mapHasil = new Map();
+                    snap0.forEach(doc => mapHasil.set(doc.id, doc.data()));
+                    snap62.forEach(doc => mapHasil.set(doc.id, doc.data()));
+
+                    hasilPencarian = Array.from(mapHasil.values());
+
+                } else {
+                    let dbQuery = firestore.collection("ocm_main_db")
+                        .where(category, ">=", keyword)
+                        .where(category, "<=", keyword + "\uf8ff");
+                        
+                    const querySnapshot = await dbQuery.get();
+                    jumlahReadsTercatat = querySnapshot.size;
+                    
+                    querySnapshot.forEach((doc) => {
+                        hasilPencarian.push(doc.data());
+                    });
+                }
+
+                catatPenggunaanReads(jumlahReadsTercatat);
+                tampilkanHasil(hasilPencarian, keyword);
+
+            } catch (error) {
+                console.error("Gagal mencari data:", error);
+                tableBody.innerHTML = `
+                    <tr>
+                        <td colspan="5" class="p-8 text-center text-rose-500 font-semibold">
+                            Terjadi kesalahan saat menarik data. Pastikan koneksi internet stabil.
+                        </td>
+                    </tr>`;
+            } finally {
+                btnSearch.disabled = false;
+                btnSearch.innerText = "Cari Data";
+            }
+        });
+
+        // =========================================================
+        // TAMPILKAN HASIL KE TABEL (DENGAN TOMBOL SALIN KONTRAK)
+        // =========================================================
+        function tampilkanHasil(data, keywordTerakhir) {
+            const tableBody = document.getElementById("resultTableBody");
+
+            if (data.length === 0) {
+                tableBody.innerHTML = `
+                    <tr>
+                        <td colspan="5" class="p-8 text-center text-slate-500">
+                            Data dengan pencarian <span class="font-bold text-slate-800">"${keywordTerakhir}"</span> tidak ditemukan di database.
+                        </td>
+                    </tr>`;
+                return;
+            }
+
+            tableBody.innerHTML = data.map((item, idx) => {
+                const btnId = `btn-copy-${idx}`;
+                return `
+                <tr class="hover:bg-slate-50/80 transition-colors">
+                    <td class="p-4 font-mono font-semibold text-indigo-600">
+                        <button id="${btnId}" onclick="salinKontrak('${item.kontrak}', '${btnId}')" class="hover:text-indigo-800 hover:bg-indigo-50 px-2 py-1 rounded transition-colors flex items-center gap-1.5 cursor-pointer outline-none" title="Klik untuk salin">
+                            ${item.kontrak || "-"}
+                            <svg class="w-3.5 h-3.5 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+                        </button>
+                    </td>
+                    <td class="p-4 font-medium text-slate-800">${item.nama || "-"}</td>
+                    <td class="p-4 text-slate-600">${item.hp || "-"}</td>
+                    <td class="p-4 text-slate-600"><span class="bg-slate-100 text-slate-600 text-[10px] font-bold px-2 py-0.5 rounded-full">${item.type || "-"}</span></td>
+                    <td class="p-4 text-right font-semibold text-rose-600">${new Intl.NumberFormat("id-ID").format(item.sisa || 0)}</td>
+                </tr>
+            `}).join("");
+        }
+    </script>
+</body>
+</html>
